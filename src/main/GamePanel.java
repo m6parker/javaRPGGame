@@ -1,0 +1,78 @@
+package main;
+
+import entity.Player;
+import tile.TileManager;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class GamePanel extends JPanel implements Runnable{
+    int originalTileSize = 16; // 16x16 tiles
+    int scale = 3;
+
+    public int tileSize = originalTileSize * scale; // 48x48 tiles
+    public int maxScreenCol = 16;
+    public int maxScreenRow = 12;
+    public int screenWidth = tileSize * maxScreenCol;  // 768 pixels
+    public int screenHeight = tileSize * maxScreenRow; // 576 pixels
+     int FPS = 60;
+
+    TileManager tileManager = new TileManager(this);
+    KeyHandler keyHandler = new KeyHandler();
+    Thread gameThread;
+    Player player = new Player(this, keyHandler);
+
+
+    public GamePanel(){
+        this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+        this.setBackground(Color.black);
+        this.setDoubleBuffered(true);
+        this.addKeyListener(keyHandler);
+        this.setFocusable(true);
+    }
+
+    public void startGameThread(){
+        gameThread = new Thread(this);
+        gameThread.start();
+    }
+
+    @Override
+    public void run() {
+        double drawInterval = (double) 1000000000 /FPS; // draw 60 times per second
+        double nextDrawTime = System.nanoTime() + drawInterval;
+
+        while(gameThread != null){
+            update();
+            repaint();
+
+            try {
+                double remainingTime = nextDrawTime - System.nanoTime();
+                remainingTime = remainingTime/1000000; // millis conversion
+                if(remainingTime < 0){
+                    remainingTime = 0;
+                }
+
+                Thread.sleep((long) remainingTime);
+                nextDrawTime += drawInterval;
+
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void update(){
+        player.update();
+    }
+
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+
+        Graphics2D g2 = (Graphics2D)g;
+
+        tileManager.draw(g2);
+        player.draw(g2);
+
+        g2.dispose();
+    }
+}
