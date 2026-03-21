@@ -13,22 +13,37 @@ public class Player extends Entity{
     GamePanel gamePanel;
     KeyHandler keyHandler;
 
+    public final int screenX;
+    public final int screenY;
+
     public Player(GamePanel gamePanel, KeyHandler keyHandler){
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
+
+        // places the player at the center of the screen
+        // gamePanel.screenWidth/2 and gamePanel.screenHeight/2 is the middle pixel
+        // (gamePanel.tileSize/2) uses the middle of the sprite character (which is 1 tile large)
+        screenX = gamePanel.screenWidth/2 - (gamePanel.tileSize/2);
+        screenY = gamePanel.screenHeight/2 - (gamePanel.tileSize/2);
 
         setDefaultValues();
         getPlayerImage();
     }
 
     public void setDefaultValues(){
-        x = 100;
-        y=100;
+        // default player starting position on the map
+        worldX = gamePanel.tileSize * 10;
+        worldY = gamePanel.tileSize * 10;
+
+        direction = "down"; // starting direction
+
+        // todo: replace with variable later for upgrading player stats
+        // ex. speed, stamina, strength, health
         speed = 5;
-        direction = "down";
     }
 
     public void getPlayerImage(){
+        // todo: replace with variable later for upgrading player appearance
         try{
             down1 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/fish_down1.png")));
             down2 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/fish_down2.png")));
@@ -44,22 +59,25 @@ public class Player extends Entity{
     }
 
     public void update(){
+
+        // check if a key is being pressed so the player is not animating while standing still
         if(keyHandler.upPressed || keyHandler.downPressed || keyHandler.leftPressed || keyHandler.rightPressed) {
 
             if (keyHandler.upPressed) {
                 direction = "up";
-                y -= speed;
+                worldY -= speed;
             } else if (keyHandler.downPressed) {
                 direction = "down";
-                y += speed;
+                worldY += speed;
             } else if (keyHandler.leftPressed) {
                 direction = "left";
-                x -= speed;
+                worldX -= speed;
             } else if (keyHandler.rightPressed) {
                 direction = "right";
-                x += speed;
+                worldX += speed;
             }
 
+            // alternate between player images for smooth transitions
             spriteCounter++;
             if (spriteCounter > 12) {
                 if (spriteNum == 1) {
@@ -73,7 +91,7 @@ public class Player extends Entity{
     }
     public void draw(Graphics2D g2){
 //        g2.setColor(Color.orange);
-//        g2.fillRect(x, y, gamePanel.tileSize, gamePanel.tileSize);
+//        g2.fillRect(x, worldY, gamePanel.tileSize, gamePanel.tileSize);
 
         BufferedImage image = null;
         switch (direction) {
@@ -113,6 +131,8 @@ public class Player extends Entity{
                 image = null;
                 break;
         }
-        g2.drawImage(image, x, y, gamePanel.tileSize, gamePanel.tileSize, null);
+
+        // the player remains at the center of the screen as the background is moved behind it
+        g2.drawImage(image, screenX, screenY, gamePanel.tileSize, gamePanel.tileSize, null);
     }
 }
