@@ -26,6 +26,12 @@ public class Player extends Entity{
         screenX = gamePanel.screenWidth/2 - (gamePanel.tileSize/2);
         screenY = gamePanel.screenHeight/2 - (gamePanel.tileSize/2);
 
+        // the area that the player will have collision.
+        // if the tile-size is 16 pixels, and the game is scaled by 3x
+        // the total player height (one tile) is 48
+        // to make the whole tile solid, it would be Rectangle(0,0,48,48)
+        solidArea = new Rectangle(8, 16, 32, 32);
+
         setDefaultValues();
         getPlayerImage();
     }
@@ -65,16 +71,34 @@ public class Player extends Entity{
 
             if (keyHandler.upPressed) {
                 direction = "up";
-                worldY -= speed;
             } else if (keyHandler.downPressed) {
                 direction = "down";
-                worldY += speed;
             } else if (keyHandler.leftPressed) {
                 direction = "left";
-                worldX -= speed;
             } else if (keyHandler.rightPressed) {
                 direction = "right";
-                worldX += speed;
+            }
+
+            // check tile collision
+            collisionOn = false;
+            gamePanel.checker.checkTile(this);
+
+            // no collision = player can move
+            if(!collisionOn){
+                switch (direction){
+                    case "up":
+                        worldY -= speed;
+                        break;
+                    case "down":
+                        worldY += speed;
+                        break;
+                    case "left":
+                        worldX -= speed;
+                        break;
+                    case "right":
+                        worldX += speed;
+                        break;
+                }
             }
 
             // alternate between player images for smooth transitions
