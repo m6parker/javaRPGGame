@@ -2,17 +2,23 @@ package tile;
 
 import main.GamePanel;
 
+import java.util.List;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 public class TileManager {
     GamePanel gp;
     public Tile[] tile;
     public int mapTileNum[][];
+    private Tile[] tileList;
+    public String jsonPath = "/maps/map2.json";
 
     public TileManager(GamePanel gp){
         this.gp = gp;
@@ -21,49 +27,71 @@ public class TileManager {
         mapTileNum = new int[gp.maxWorldCol][gp.maxWorldRow];
 
         getTileImage();
-        loadMap("/maps/map2.txt");
+//        loadMap("/maps/map2.json");
+        loadMapFromJson();
     }
 
     public void getTileImage(){
-        try{
-            tile[0] = new Tile();
-            tile[0].image = ImageIO.read(getClass().getResourceAsStream("/tiles/rock.png"));
-            tile[0].collision = true;
+        // get the tile types from the external tile config file
+        ObjectMapper mapper = new ObjectMapper();
+        try (InputStream is = getClass().getResourceAsStream("/tiles/config.json")) {
+            if (is == null) {
+                throw new RuntimeException("Could not find tiles.json in resources!");
+            }
 
-            tile[1] = new Tile();
-            tile[1].image = ImageIO.read(getClass().getResourceAsStream("/tiles/water.png"));
+            List<Map<String, Object>> tilesConfig = mapper.readValue(
+                    is,
+                    mapper.getTypeFactory().constructCollectionType(List.class, Map.class)
+            );
 
-        }catch (IOException e){
+            // Initialize tile array based on the number of tiles in the config
+            tile = new Tile[tilesConfig.size()];
+
+            for (Map<String, Object> config : tilesConfig) {
+                int id = ((Number) config.get("id")).intValue();
+                String imagePath = "/tiles/" + config.get("image");
+                boolean collision = (boolean) config.get("collision");
+
+                tile[id] = new Tile();
+                tile[id].image = ImageIO.read(getClass().getResourceAsStream(imagePath));
+                tile[id].collision = collision;
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to load tiles: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void loadMap(String filePath){
-        try{
-            InputStream is = getClass().getResourceAsStream(filePath);
-            assert is != null;
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    public void loadMapFromJson() {
+        ObjectMapper mapper = new ObjectMapper();
+        try (InputStream is = getClass().getResourceAsStream(jsonPath)) {
+            if (is == null) {
+                throw new RuntimeException("Could not find map JSON: " + jsonPath);
+            }
 
-            int col = 0;
-            int row = 0;
-            while(col < gp.maxWorldCol && row < gp.maxWorldRow){
-                String line = br.readLine();
-                while(col < gp.maxWorldCol){
-                    String[] numbers = line.split(" ");
-                    int num = Integer.parseInt(numbers[col]);
-                    mapTileNum[col][row] = num;
-                    col++;
-                }
-                System.out.println("col: " + col);
-//                System.out.println("row: " + row);
-                if(col == gp.maxWorldCol){
-                    col = 0;
-                    row++;
+            // Parse the entire map structure
+            Map<String, Object> mapData = mapper.readValue(is, Map.class);
+
+            // Extract the first layer
+            List<Map<String, Object>> layers = (List<Map<String, Object>>) mapData.get("layers");
+            if (layers.isEmpty()) {
+                throw new RuntimeException("No layers found in the map!");
+            }
+
+            Map<String, Object> firstLayer = layers.get(0);
+            List<Integer> layerDataList = (List<Integer>) firstLayer.get("data");
+
+            // Fill the mapTileNum array
+            for (int y = 0; y < gp.maxWorldRow; y++) {
+                for (int x = 0; x < gp.maxWorldCol; x++) {
+                    int index = y * gp.maxWorldCol + x;
+                    mapTileNum[x][y] = layerDataList.get(index);
                 }
             }
-            br.close();
-        }catch (Exception e){
 
+        } catch (Exception e) {
+            System.err.println("Failed to load map: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
