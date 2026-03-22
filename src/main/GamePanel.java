@@ -1,5 +1,6 @@
 package main;
 
+import Item.Item;
 import entity.Player;
 import tile.TileManager;
 
@@ -31,6 +32,9 @@ public class GamePanel extends JPanel implements Runnable{
     Thread gameThread;
     public CollisionChecker checker = new CollisionChecker(this);
     public Player player = new Player(this, keyHandler);
+    public AssetSetter assetSetter = new AssetSetter(this);
+    public Item[] items = new Item[10]; // number of items that can be displayed at once in the world
+
 
 
     public GamePanel(){
@@ -39,6 +43,10 @@ public class GamePanel extends JPanel implements Runnable{
         this.setDoubleBuffered(true);
         this.addKeyListener(keyHandler);
         this.setFocusable(true);
+    }
+
+    public void setGameItems(){
+        assetSetter.setItem();
     }
 
     public void startGameThread(){
@@ -82,6 +90,11 @@ public class GamePanel extends JPanel implements Runnable{
 
         tileManager.draw(g2);
         player.draw(g2);
+        for (int i = 0; i < items.length; i++){
+            if(items[i] != null){
+                items[i].draw(g2, this);
+            }
+        }
 
         g2.dispose();
     }

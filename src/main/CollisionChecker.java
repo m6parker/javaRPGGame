@@ -27,7 +27,7 @@ public class CollisionChecker {
         int tileNum2;
 
         // using the players direction - find the next tile that the player will touch
-        // check if its a solid tile or a non-collision tile
+        // check if it's a solid tile or a non-collision tile
         // if the tile is found to be solid, turn player collision on (stop player movement in that direction)
         switch (entity.direction){
             case "up":
