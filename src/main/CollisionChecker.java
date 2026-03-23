@@ -64,4 +64,73 @@ public class CollisionChecker {
                 break;
         }
     }
+
+    public int checkObject(Entity entity, boolean player){
+        int index = 999;
+        for (int i = 0; i < gp.items.length; i++) {
+            if(gp.items[i] != null){
+                // get player's position
+                entity.solidArea.x = entity.worldX + entity.solidArea.x;
+                entity.solidArea.y = entity.worldY + entity.solidArea.y;
+
+                // get item's position
+                gp.items[i].solidArea.x = gp.items[i].worldX + gp.items[i].solidArea.x;
+                gp.items[i].solidArea.y = gp.items[i].worldY + gp.items[i].solidArea.y;
+
+                switch (entity.direction){
+                    case "up":
+                        entity.solidArea.y -= entity.speed;
+                        if(entity.solidArea.intersects(gp.items[i].solidArea)){
+                            // check if the item is a solid object / blockage (ex. door)
+                            if(gp.items[i].collision){
+                                entity.collisionOn = true;
+                            }
+                            // check if its the player making contact with an item
+                            if(player){
+                                index = i;
+                            }
+                        }
+                        break;
+                    case "down":
+                        entity.solidArea.y += entity.speed;
+                        if(entity.solidArea.intersects(gp.items[i].solidArea)){
+                            if(gp.items[i].collision){
+                                entity.collisionOn = true;
+                            }
+                            if(player){
+                                index = i;
+                            }
+                        }
+                        break;
+                    case "left":
+                        entity.solidArea.x -= entity.speed;
+                        if(entity.solidArea.intersects(gp.items[i].solidArea)){
+                            if(gp.items[i].collision){
+                                entity.collisionOn = true;
+                            }
+                            if(player){
+                                index = i;
+                            }
+                        }
+                        break;
+                    case "right":
+                        entity.solidArea.x += entity.speed;
+                        if(entity.solidArea.intersects(gp.items[i].solidArea)){
+                            if(gp.items[i].collision){
+                                entity.collisionOn = true;
+                            }
+                            if(player){
+                                index = i;
+                            }
+                        }
+                        break;
+                }
+                entity.solidArea.x = entity.solidAreaDefaultX;
+                entity.solidArea.y = entity.solidAreaDefaultY;
+                gp.items[i].solidArea.x = gp.items[i].solidAreaDefaultX;
+                gp.items[i].solidArea.y = gp.items[i].solidAreaDefaultY;
+            }
+        }
+        return index;
+    }
 }

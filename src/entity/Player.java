@@ -15,6 +15,7 @@ public class Player extends Entity{
 
     public final int screenX;
     public final int screenY;
+    int wormCount = 0;
 
     public Player(GamePanel gamePanel, KeyHandler keyHandler){
         this.gamePanel = gamePanel;
@@ -31,6 +32,8 @@ public class Player extends Entity{
         // the total player height (one tile) is 48
         // to make the whole tile solid, it would be Rectangle(0,0,48,48)
         solidArea = new Rectangle(8, 16, 32, 32);
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
 
         setDefaultValues();
         getPlayerImage();
@@ -81,7 +84,11 @@ public class Player extends Entity{
 
             // check tile collision
             collisionOn = false;
-            gamePanel.checker.checkTile(this);
+            gamePanel.collisionChecker.checkTile(this);
+
+            //check item collision
+            int itemIndex = gamePanel.collisionChecker.checkObject(this, true);
+            pickUpItem(itemIndex);
 
             // no collision = player can move
             if(!collisionOn){
@@ -113,6 +120,23 @@ public class Player extends Entity{
             }
         }
     }
+
+    public void pickUpItem(int index){
+        // a number thats definately not in the item array
+        if(index != 999){
+
+            String itemName = gamePanel.items[index].name;
+            switch (itemName){
+                case "worm":
+                    // deletes item on contact
+                    gamePanel.items[index] = null;
+                    wormCount++;
+                    System.out.println("worms: "+ wormCount);
+                    break;
+            }
+        }
+    }
+
     public void draw(Graphics2D g2){
 //        g2.setColor(Color.orange);
 //        g2.fillRect(x, worldY, gamePanel.tileSize, gamePanel.tileSize);

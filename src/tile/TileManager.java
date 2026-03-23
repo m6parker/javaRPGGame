@@ -54,8 +54,6 @@ public class TileManager {
                     mapTileNum[col][row] = num;
                     col++;
                 }
-                System.out.println("col: " + col);
-//                System.out.println("row: " + row);
                 if(col == gp.maxWorldCol){
                     col = 0;
                     row++;

@@ -30,7 +30,7 @@ public class GamePanel extends JPanel implements Runnable{
     TileManager tileManager = new TileManager(this);
     KeyHandler keyHandler = new KeyHandler();
     Thread gameThread;
-    public CollisionChecker checker = new CollisionChecker(this);
+    public CollisionChecker collisionChecker = new CollisionChecker(this);
     public Player player = new Player(this, keyHandler);
     public AssetSetter assetSetter = new AssetSetter(this);
     public Item[] items = new Item[10]; // number of items that can be displayed at once in the world

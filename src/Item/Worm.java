@@ -12,5 +12,7 @@ public class Worm extends Item{
         }catch(IOException e ){
             e.printStackTrace();
         }
+
+        // set collision here for unmoveable objects
     }
 }

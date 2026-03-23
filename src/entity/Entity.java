@@ -17,6 +17,7 @@ public class Entity {
     // the part of the entity that is solid
     // ex. player's feet, not whole tile of player
     public Rectangle solidArea;
+    public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
 
 }
